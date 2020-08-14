@@ -28,7 +28,7 @@ class TqdmUpTo(tqdm):
         self.last_block = current
 
 
-for message in app.iter_history(chat_id=channel_name, offset_id=offset_id, ):
+for message in app.iter_history(chat_id=channel_name, offset_id=offset_id, reverse = reverse):
     try:
         if message.document.file_name in os.listdir(save_path):
             pass
