@@ -13,7 +13,7 @@ pip3 install tqdm
 
 下载脚本
 
-git clone https://github.com/snow922841/telegram_chanle_downloader.git
+git clone https://github.com/snow922841/telegram_channel_downloader.git
   
 2、使用
 
