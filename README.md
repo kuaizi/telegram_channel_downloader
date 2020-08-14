@@ -14,4 +14,9 @@ pip3 install tqdm
 git clone https://github.com/snow922841/telegram_chanle_downloader.git
   
 2、使用
- 
+进入脚本目录
+修改config.ini文件内的 api_id 和 api_hash 为你自己的
+修改脚本内的频道名称、保存路径
+
+运行  python3 tg_channel_downloader.py
+按照提示输入telegram绑定的手机号获取验证码并输入 
