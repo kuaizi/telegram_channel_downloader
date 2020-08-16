@@ -5,7 +5,7 @@ import os, re
 from tqdm import tqdm
 ################################### config ###############################################
 black_list = ['7z', 'rar', 'zip']               # 过滤黑名单，列表中的文件格式不下载。
-save_path = f'E:\\tmp\\{channel_name}'          # 文件保存路径 Linux 系统 一般路径格式为 '/tmp/download'
+save_path = f'E:\\tmp\\{chat_id}'               # 文件保存路径 Linux 系统 一般路径格式为 '/tmp/download'
 chat_id = '@example'                            # 频道名称或群组名称
 offset_id = 0                                   # 消息偏移量， int类型，从指定的消息ID开始遍历。
 reverse = False                                 # 从新的消息往旧的消息遍历，如果改为True则从旧消息往后遍历
@@ -78,7 +78,7 @@ def main():
 if __name__ == '__main__':
     app = Client("my_account")
     app.start()
-    # chat_id = "@MRHXPJ"
+    chat_id = "@MRHXPJ"
     # chat_id = "@mengxinsetu" -5506
     # chat_id =   "@ONEPIECETHKyoto" # - 69985
     # chat_id = '@okjfresh' # 6850
