@@ -9,7 +9,7 @@ Telegram 频道/群组 文件下载脚本
 
  pip3 install tqdm
  ```
- 从 https://my.telegram.org/apps 获取自己的Telegram API密钥。
+ - 从 https://my.telegram.org/apps 获取自己的Telegram API密钥。
 
  - 下载脚本
  ```
