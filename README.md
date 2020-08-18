@@ -1,9 +1,13 @@
 # telegram_channel_downloader
 Telegram 频道/群组 文件下载脚本
 脚本需要python3环境，具体安装教程自行搜索。
+
 **1. 安装**
+ 
  - 安装redis
+ 
  安装教程参考 [Redis 安装 | 菜鸟教程](https://www.runoob.com/redis/redis-install.html)
+ 
  - 安装依赖 
  ```
  pip3 install -U pyrogram
