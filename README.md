@@ -41,6 +41,7 @@ Telegram 频道/群组 文件下载脚本
   <details>
     <summary>2020-08-19更新</summary>
      - 添加自动上传到Googledrive的功能
+     
      - 使用redis缓存已经遍历的消息ID
-</details>
+  </details>
 </details>
