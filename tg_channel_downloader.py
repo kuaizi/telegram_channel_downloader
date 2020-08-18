@@ -1,16 +1,21 @@
 # -*- coding:utf-8 -*-
 import datetime
 from pyrogram import Client
-import os, re
+import os
 from tqdm import tqdm
+import re
+import redis  # 导入redis 模块
+import subprocess
+import logging
 ################################### config ###############################################
-black_list = ['7z', 'rar', 'zip']               # 过滤黑名单，列表中的文件格式不下载。
-save_path = f'E:\\tmp\\{chat_id}'               # 文件保存路径 Linux 系统 一般路径格式为 '/tmp/download'
+filter_list = ['7z', 'rar', 'zip']               # 过滤黑名单，列表中的文件格式不下载。
+save_path = 'E:\\tmp'               # 文件保存路径 Linux 系统 一般路径格式为 '/tmp/download'
 chat_id = '@example'                            # 频道名称或群组名称
-offset_id = 0                                   # 消息偏移量， int类型，从指定的消息ID开始遍历。
-reverse = False                                 # 从新的消息往旧的消息遍历，如果改为True则从旧消息往后遍历
-limit = 0                                       # 限制返回消息数量
 ##########################################################################################
+logger = logging.getLogger(__name__)
+# 配置redis
+pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
+r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 
 
@@ -30,24 +35,27 @@ def validateTitle(title):
     new_title = re.sub(r_str, "_", title)  # 替换为下划线
     return new_title
 
+
 def main():
-    for message in app.iter_history(chat_id=chat_id, offset_id=offset_id, reverse=reverse, limit=limit):
+    # 如果缓存了对话标题，就取出数据
+    if r.hexists('tg_channel_downloader', chat_id):
+        offset_id = int(r.hget('tg_channel_downloader', chat_id))
+    else:
+        # 如果 redis没有缓存对话标题，设置offset_id 为0从最新开始的下载。
+        offset_id = 0
+    for message in app.iter_history(chat_id=chat_id, offset_id=offset_id, reverse=False, limit=limit):
         if message.media:
             # print(message)
             # 标题
             caption = message.caption.replace(':', '：') if message.caption != None else ""
-
             # 相册ID
             group_id = message.media_group_id if message.media_group_id != None else ""
-
             # 文件夹名
             dir_name = datetime.datetime.fromtimestamp(message.date).strftime("%Y年%m月")
-            file_save_path = os.path.join(save_path, dir_name)
-
+            file_save_path = os.path.join(save_path, chat_id, dir_name)
             # 如果文件夹不存在则创建文件夹
             if not os.path.exists(file_save_path):
                 os.makedirs(file_save_path)
-
             # 如果是图片
             if message.photo != None:
                 file_name = f'{message.message_id}-{group_id}-{caption}.jpg'
@@ -63,23 +71,52 @@ def main():
             else:
                 # print(message.message_id, '\n')
                 continue
-
-            file_name = validateTitle(file_name)  # 去掉文件名称中的特殊字符
-
+            # 去掉文件名称中的特殊字符
+            file_name = validateTitle(file_name)
+            # 判断文件是否在本地存在
             if file_name in os.listdir(file_save_path):
                 continue
-            elif file_name.split('.')[-1] in black_list:
+            # 判断文件类型是否在黑名单
+            elif file_name.split('.')[-1] in filter_list:
                 continue
             else:
-                t = TqdmUpTo(total=total, desc=file_name, unit='B', unit_scale=True)
-                message.download(file_name=os.path.join(file_save_path, file_name), progress=t.my_update)
-                t.close()
-
+                td = TqdmUpTo(total=total, desc=f'Downloading: {file_name}', unit='B', unit_scale=True)
+                message.download(file_name=os.path.join(file_save_path, file_name), progress=td.my_update)
+                td.close()
+                # 如果无需保留本地文件，请自行把下面一行代码中copy 改成 move
+                cmd = ['gclone','copy',os.path.join(file_save_path, file_name),
+                       f'{rclone_drive_name}:{{{rclone_drive_id}}}/{chat_id}/{dir_name}', '-P']
+                ret = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', universal_newlines=True)
+                tl = TqdmUpTo(total=total, desc=f'--Uploading: {file_name}', unit='B', unit_scale=True)
+                while True:
+                    try:
+                        output = ret.stdout.readline()
+                    except:
+                        continue
+                    if output == '' and ret.poll() is not None:
+                        break
+                    if output:
+                        regex_total_size = r'Transferred:[\s]+([\d.]+\s*[kMGTP]?) / ([\d.]+[\s]?[kMGTP]?Bytes),' \
+                                           r'\s*(?:\-|(\d+)\%),\s*([\d.]+\s*[kMGTP]?Bytes/s),\s*ETA\s*([\-0-9hmsdwy]+)'
+                        match_total_size = re.search(regex_total_size, output)
+                        if match_total_size:
+                            # 已上传数据大小
+                            progress_transferred_size = match_total_size.group(1)
+                            if progress_transferred_size.endswith('k'):
+                                current = progress_transferred_size * 1024
+                            else:
+                                current = progress_transferred_size * 1024 * 1024
+                            tl.my_update(total=total, current= current)
+                tl.close()
+                if ret.returncode == 0:
+                    r.hset('tg_channel_downloader', chat_id, message.message_id)
+                    # print(f'{file_name} - 上传成功')
+                else:
+                    logger.warning(f'{file_name} - 上传失败 - {ret}')
+                    
+                    
 if __name__ == '__main__':
     app = Client("my_account")
     app.start()
-    chat_id = "@MRHXPJ"
-    # chat_id = "@mengxinsetu" -5506
-    # chat_id =   "@ONEPIECETHKyoto" # - 69985
-    # chat_id = '@okjfresh' # 6850
     main()
+    app.close()
