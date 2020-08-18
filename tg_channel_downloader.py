@@ -7,11 +7,13 @@ import re
 import redis  # 导入redis 模块
 import subprocess
 import logging
-################################### config ###############################################
-filter_list = ['7z', 'rar', 'zip']               # 过滤黑名单，列表中的文件格式不下载。
-save_path = 'E:\\tmp'               # 文件保存路径 Linux 系统 一般路径格式为 '/tmp/download'
-chat_id = '@example'                            # 频道名称或群组名称
-##########################################################################################
+######################################## config ###############################################
+filter_list = ['7z', 'rar', 'zip']            # 过滤黑名单，列表中的文件格式不下载。
+save_path = 'E:\\tmp'                         # 文件保存路径 Linux 系统 一般路径格式为 '/tmp/download'
+chat_id = '@example'                          # 频道名称或群组名称
+rclone_drive_name = 'gc'                      # rclone 配置网盘名称
+rclone_drive_id = '1234567890ABCD'            # rclone 团队盘ID
+###############################################################################################
 logger = logging.getLogger(__name__)
 # 配置redis
 pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
@@ -43,7 +45,7 @@ def main():
     else:
         # 如果 redis没有缓存对话标题，设置offset_id 为0从最新开始的下载。
         offset_id = 0
-    for message in app.iter_history(chat_id=chat_id, offset_id=offset_id, reverse=False, limit=limit):
+    for message in app.iter_history(chat_id=chat_id, offset_id=offset_id):
         if message.media:
             # print(message)
             # 标题
