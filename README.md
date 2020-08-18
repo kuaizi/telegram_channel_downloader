@@ -1,13 +1,16 @@
 # telegram_channel_downloader
 Telegram 频道/群组 文件下载脚本
-
+脚本需要python3环境，具体安装教程自行搜索。
 **1. 安装**
-
- - 安装依赖
+ - 安装redis
+ 安装教程参考 [Redis 安装 | 菜鸟教程](https://www.runoob.com/redis/redis-install.html)
+ - 安装依赖 
  ```
  pip3 install -U pyrogram
 
  pip3 install tqdm
+ 
+ pip3 install redis
  ```
  - 从 https://my.telegram.org/apps 获取自己的Telegram API密钥。
 
@@ -28,3 +31,12 @@ Telegram 频道/群组 文件下载脚本
  python3 tg_channel_downloader.py
  ```
  - 按照提示输入telegram绑定的手机号获取验证码并输入 
+
+<details>
+  <summary>点击查看更新日志</summary>
+  <details>
+    <summary>2020-08-19更新</summary>
+     - 添加自动上传到Googledrive的功能
+     - 使用redis缓存已经遍历的消息ID
+</details>
+</details>
