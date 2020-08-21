@@ -128,4 +128,4 @@ if __name__ == '__main__':
     app = Client("my_account")
     app.start()
     main()
-    app.close()
+    app.stop()
