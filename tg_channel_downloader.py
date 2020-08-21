@@ -54,7 +54,14 @@ def main():
             group_id = message.media_group_id if message.media_group_id != None else ""
             # 文件夹名
             dir_name = datetime.datetime.fromtimestamp(message.date).strftime("%Y年%m月")
-            file_save_path = os.path.join(save_path, chat_id, dir_name)
+            
+            # 判断chatId类型
+            if type(chat_id)== int:
+                title = validateTitle(message.chat.title)
+                file_save_path = os.path.join(save_path, title, dir_name)
+            else:
+                file_save_path = os.path.join(save_path, str(chat_id), dir_name)
+            
             # 如果文件夹不存在则创建文件夹
             if not os.path.exists(file_save_path):
                 os.makedirs(file_save_path)
