@@ -84,6 +84,8 @@ def main():
                 continue
             # 去掉文件名称中的特殊字符
             file_name = validateTitle(file_name)
+            if len(file_name) > 100:
+                file_name = file_name.replace(file_name[100:-10], '')
             # 判断文件是否在本地存在
             if file_name in os.listdir(file_save_path):
                 continue
