@@ -53,6 +53,7 @@ def main():
             # print(message)
             # 标题
             caption = message.caption.replace(':', '：') if message.caption != None else ""
+            caption = caption[:100] if len(caption) > 100 else caption[:-1]
             # 相册ID
             group_id = message.media_group_id if message.media_group_id != None else ""
             # 文件夹名
@@ -85,8 +86,6 @@ def main():
                 continue
             # 去掉文件名称中的特殊字符
             file_name = validateTitle(file_name)
-            if len(file_name) > 100:
-                file_name = file_name.replace(file_name[100:-10], '')
             # 判断文件是否在本地存在
             if file_name in os.listdir(file_save_path):
                 continue
