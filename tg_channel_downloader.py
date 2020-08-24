@@ -16,8 +16,7 @@ rclone_drive_name = 'gc'                        # rclone 配置网盘名称
 rclone_drive_id = '1234567890ABCD'              # rclone 团队盘ID
 upload = False                                  # 是否上传到GD盘 默认不上传，如需上传，需要设置gclone，并把此项改为True
 delete_local_file = False                       # 是否删除本地文件 默认保留，如需删除，改为True
-reverse = True                                  # 默认从往后下载
-limit = 0                                       # 限制消息数量
+reverse = True                                  # 默认从旧消息往新消息顺序下载
 ###############################################################################################
 logger = logging.getLogger(__name__)
 # 配置redis
