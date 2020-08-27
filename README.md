@@ -11,6 +11,8 @@ Telegram 频道/群组 文件下载脚本
  - 安装依赖 
  ```
  pip3 install -U pyrogram
+ 
+ pip3 install -U tgcrypto
 
  pip3 install tqdm
  
