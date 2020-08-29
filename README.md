@@ -1,7 +1,7 @@
 # telegram_channel_downloader
 Telegram 频道/群组 文件下载脚本
 脚本需要python3环境，具体安装教程自行搜索。
-
+测试环境  Ubuntu 18.04.5 LTS & Python 3.6.9
 **1. 安装**
  
  - 安装redis
@@ -10,13 +10,20 @@ Telegram 频道/群组 文件下载脚本
  
  - 安装依赖 
  ```
- pip3 install -U pyrogram
+ pip3 install -U telethon --user
  
- pip3 install -U tgcrypto
+ pip3 install cryptg
 
  pip3 install tqdm
  
  pip3 install redis
+ 
+ pip3 install pillow
+ 
+ pip3 install aiohttp
+ 
+ pip3 install hachoir
+ 
  ```
  - 从 https://my.telegram.org/apps 获取自己的Telegram API密钥。
 
@@ -28,7 +35,7 @@ Telegram 频道/群组 文件下载脚本
 
  - 进入脚本目录
 
- - 修改config.ini文件内的 api_id 和 api_hash 为你自己的
+ - 修改telegram_channel_downloader.py文件内的 api_id 和 api_hash 为你自己的
 
  - 修改脚本内的频道名称、保存路径
  
@@ -48,4 +55,17 @@ Telegram 频道/群组 文件下载脚本
    - 添加自动上传到Googledrive的功能
      
    - 使用redis缓存已经遍历的消息ID
+ 
+  2020-08-29更新
+  
+  - 更换telegram的第三方库
+  
+  - 默认上传到GD，目前未配置不上传，所以需要安装gclone
+  
+  - 默认过滤贴纸、动态贴纸、gif格式文件
+  
+  - 优化了下载和上传进度条的显示
+  
+  - 上传失败后会把消息ID保存在脚本所在的文件夹，方便以后可以手动下载
+  
 </details>
