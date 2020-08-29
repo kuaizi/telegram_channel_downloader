@@ -14,12 +14,16 @@ drive_id = '0ANGBw*****GSUk9PVA'                  # 要上传到的网盘ID
 drive_name = 'gc'                                 # 配置文件中的网盘名称
 save_path = '/usr/download'                       # 文件保存路径
 chat = 'https://t.me/AnchorPorn'                  # 对话，可以是ID,群组名，分享链接都支持
+bot_token = ''                                    # 用于发送消息。不填关闭功能
 #-------------------------------------------------------------------------#
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.WARNING)
 client = TelegramClient('anon', api_id, api_hash)
 pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+if bot_token != '':
+    bot = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
+
 
 class tqdm_up_to(tqdm):
     last_block = 0
@@ -54,6 +58,7 @@ def get_local_time():
 
 
 async def main():
+    me = await client.get_me()
     entity = await client.get_entity(chat)
     chat_title = entity.title
     if r.hexists('tg_channel_downloader', chat_title):
@@ -162,7 +167,11 @@ async def main():
             if ret.returncode == 0:
                 print(f'\r{get_local_time()} - {file_name} - 上传成功')
                 r.hset('tg_channel_downloader', chat_title, message.id)
+                if bot_token != '':
+                    await bot.send_message(me.username,f'{file_name}上传成功')
             else:
+                if bot_token != '':
+                    await bot.send_message(me.username,f'{file_name}上传失败')
                 logging.warning(f'\r{get_local_time()} - {file_name} - 上传失败 - code: {ret.returncode}')
                 with open(f'{chat_title}_failed.text', 'w+') as f:
                     f.write(f'{get_local_time()} - {file_name}')
