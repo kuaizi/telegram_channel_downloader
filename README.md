@@ -5,29 +5,13 @@ Telegram 频道/群组 文件下载脚本
 
 测试环境  Ubuntu 18.04.5 LTS & Python 3.6.9
 
-**1. 安装**
+**1. 前提**
  
  - 安装redis
  
  安装教程参考 [Redis 安装 | 菜鸟教程](https://www.runoob.com/redis/redis-install.html)
  
- - 安装依赖 
- ```
- pip3 install -U telethon --user
  
- pip3 install cryptg
-
- pip3 install tqdm
- 
- pip3 install redis
- 
- pip3 install pillow
- 
- pip3 install aiohttp
- 
- pip3 install hachoir
- 
- ```
  - 从 https://my.telegram.org/apps 获取自己的Telegram API密钥。
 
  - 下载脚本
@@ -37,6 +21,15 @@ Telegram 频道/群组 文件下载脚本
 **2. 使用**
 
  - 进入脚本目录
+ ```
+ cd telegram_channel_downloader
+ ```
+ - 安装依赖 
+ 
+ ```
+ pip3 install -r requirements.txt
+ 
+ ```
 
  - 修改telegram_channel_downloader.py文件内的 api_id 和 api_hash 为你自己的
 
