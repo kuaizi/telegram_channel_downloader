@@ -1,7 +1,10 @@
 # telegram_channel_downloader
 Telegram 频道/群组 文件下载脚本
+
 脚本需要python3环境，具体安装教程自行搜索。
+
 测试环境  Ubuntu 18.04.5 LTS & Python 3.6.9
+
 **1. 安装**
  
  - 安装redis
