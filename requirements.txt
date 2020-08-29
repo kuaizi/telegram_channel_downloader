@@ -1,0 +1,7 @@
+telethon
+cryptg
+tqdm
+redis
+pillow
+aiohttp
+hachoir
