@@ -4,7 +4,7 @@ import re
 import subprocess
 import time
 import redis
-from telethon import TelegramClient
+from telethon import TelegramClient, errors, events
 from tqdm import tqdm
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
