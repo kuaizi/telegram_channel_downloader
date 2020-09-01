@@ -229,6 +229,7 @@ async def handler(update):
                 entity = await client.get_entity(chat)
                 chat_title = entity.title
                 r.hset('tg_channel_downloader', chat_title, offset_id)
+                await bot.send_message(admin_id, f'消息偏移已设置为：{offset_id}')
     except errors.FloodWaitError as f:
         await bot.send_message(admin_id, f'短时间内大量请求导致错误，需要等待 `{f.seconds}` 秒')
         logging.warning(f'短时间内大量请求导致错误，需要等待 `{f.seconds}` 秒')
