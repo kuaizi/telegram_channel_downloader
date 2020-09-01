@@ -224,6 +224,11 @@ async def handler(update):
                 await main()
             if update.message.text == '/ping':
                 await bot.send_message(admin_id, 'peng')
+            if update.message.text.startswith('/change'):
+                offset_id = update.message.text.split(' ')[-1]
+                entity = await client.get_entity(chat)
+                chat_title = entity.title
+                r.hset('tg_channel_downloader', chat_title, offset_id)
     except errors.FloodWaitError as f:
         await bot.send_message(admin_id, f'短时间内大量请求导致错误，需要等待 `{f.seconds}` 秒')
         logging.warning(f'短时间内大量请求导致错误，需要等待 `{f.seconds}` 秒')
