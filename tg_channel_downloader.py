@@ -1,4 +1,6 @@
 # !/usr/bin/env python3
+import asyncio
+import difflib
 import os
 import re
 import subprocess
@@ -7,8 +9,7 @@ import redis
 from telethon import TelegramClient, errors, events
 from tqdm import tqdm
 import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.WARNING)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.WARNING)
 #-----------------------------------------------------------------------------------------------------------------#
 api_id = 1234567                                               # 你的telegram API ID  --必填
 api_hash = '141e1403**********4d525d6c54f542'                  # 你的telegram API hash -- 必填
