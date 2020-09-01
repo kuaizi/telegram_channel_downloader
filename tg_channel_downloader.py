@@ -10,15 +10,15 @@ import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.WARNING)
 #-----------------------------------------------------------------------------------------------------------------#
-api_id = 1234567                                               # 你的telegram API ID
-api_hash = '141e1403**********4d525d6c54f542'                  # 你的telegram API hash
-drive_id = '0ANGBw*****GSUk9PVA'                               # 要上传到的网盘ID
-drive_name = 'gc'                                              # 配置文件中的网盘名称
-save_path = '/usr/download'                                    # 文件保存路径
+api_id = 1234567                                               # 你的telegram API ID  --必填
+api_hash = '141e1403**********4d525d6c54f542'                  # 你的telegram API hash -- 必填
+drive_id = '0ANGBw*****GSUk9PVA'                               # 要上传到的网盘ID  如果 upload_file_set 设置为True 为必填
+drive_name = 'gc'                                              # 配置文件中的网盘名称 如果 upload_file_set 设置为True 为必填
+save_path = '/usr/download'                                    # 文件保存路径 -- 选填
 chat = 'https://t.me/AnchorPorn'                               # 对话，可以是ID,群组名，分享链接都支持
 bot_token = '1234567890:AAGZ3cbe1i***************-p63T_hiBo'   # bot_token 用于发送消息。 必填
-admin_id = 888888888                                           # 你自己的telegram用户ID  可以使用@get_id_bot 找到
-upload_file_set = False                                        # 是否上传GD
+admin_id = 888888888                                           # 你自己的telegram用户ID  可以使用@get_id_bot 找到 必填
+upload_file_set = False                                        # 是否上传GD 必填， True 或者 False
 maximum_seconds_per_download = 1500                            # 超时时间 可选
 filter_list = ['',
                '',
