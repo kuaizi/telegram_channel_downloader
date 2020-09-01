@@ -228,7 +228,7 @@ async def handler(update):
         await bot.send_message(admin_id, f'短时间内大量请求导致错误，需要等待 `{f.seconds}` 秒')
         logging.warning(f'短时间内大量请求导致错误，需要等待 `{f.seconds}` 秒')
     except Exception as e:
-        await bot.send_message(admin_id, str(e))
+        await bot.send_message(admin_id, '出现异常：\n' + str(e))
         logging.warning(e)
 
 
