@@ -132,88 +132,96 @@ async def upload_file(cmd, total, file_name, entity_url, message, chat_title):
 
 
 async def main():
-    entity = await client.get_entity(chat)
-    chat_title = entity.title
-    if entity.username == None:
-        entity_url = 'https://t.me/c/{}'.format(entity.id)
-    else:
-        entity_url = 'https://t.me/{}'.format(entity.username)
-    if r.hexists('tg_channel_downloader', chat_title):
-        offset_id = int(r.hget('tg_channel_downloader', chat_title))
-    else:
-        # 如果 redis没有缓存对话标题，设置offset_id 为0从最新开始的下载。
-        offset_id = 0
-    print(f'{get_local_time()} - 开始下载：{chat_title}({entity.id})')
-    loop = asyncio.get_event_loop()
-    async for message in client.iter_messages(entity=chat, reverse=True, offset_id=offset_id, limit=None):
-        # 判断是否是媒体文件。包含各种文件和视频、图片。
-        if message.media:
-            # 如果是一组媒体
-            caption = await get_group_caption(message) if (message.grouped_id and message.text == "") else message.text
+    try:
+        entity = await client.get_entity(chat)
+        chat_title = entity.title
+        if entity.username == None:
+            entity_url = 'https://t.me/c/{}'.format(entity.id)
+        else:
+            entity_url = 'https://t.me/{}'.format(entity.username)
+        if r.hexists('tg_channel_downloader', chat_title):
+            offset_id = int(r.hget('tg_channel_downloader', chat_title))
+        else:
+            # 如果 redis没有缓存对话标题，设置offset_id 为0从最新开始的下载。
+            offset_id = 0
+        tqdm.write(f'{get_local_time()} - 开始下载：{chat_title}({entity.id})')
+        await bot.send_message(admin_id, f'开始下载：{chat_title}({entity.id}) - {offset_id}')
+        loop = asyncio.get_event_loop()
+        async for message in client.iter_messages(entity=chat, reverse=True, offset_id=offset_id, limit=None):
+            # 判断是否是媒体文件。包含各种文件和视频、图片。
+            if message.media:
+                # 如果是一组媒体
+                caption = await get_group_caption(message) if (message.grouped_id and message.text == "") else message.text
 
-            # 过滤文件名称中的广告等词语
-            if len(filter_list) and caption != "":
-                for filter_keyword in filter_list:
-                    caption = caption.replace(filter_keyword, "")
+                # 过滤文件名称中的广告等词语
+                if len(filter_list) and caption != "":
+                    for filter_keyword in filter_list:
+                        caption = caption.replace(filter_keyword, "")
 
-            # 如果文件文件名不是空字符串，则进行过滤和截取，避免文件名过长导致的错误
-            caption = "" if caption == "" else f'{validateTitle(caption)} - '[:40]
-            file_name = ''
-            # 如果是文件
-            if message.document:
-                # 如果是 贴纸
-                if message.media.document.mime_type == "image/webp":
-                    continue
-                # 如果是动画贴纸
-                if message.media.document.mime_type == "application/x-tgsticker":
-                    continue
-                for i in message.document.attributes:
-                    try:
-                        file_name = i.file_name
-                    except:
+                # 如果文件文件名不是空字符串，则进行过滤和截取，避免文件名过长导致的错误
+                caption = "" if caption == "" else f'{validateTitle(caption)} - '[:40]
+                file_name = ''
+                # 如果是文件
+                if message.document:
+                    # 如果是 贴纸
+                    if message.media.document.mime_type == "image/webp":
                         continue
-                if file_name == '':
-                    file_name = f'{message.id} - {caption}.{message.document.mime_type.split("/")[-1]}'
+                    # 如果是动画贴纸
+                    if message.media.document.mime_type == "application/x-tgsticker":
+                        continue
+                    for i in message.document.attributes:
+                        try:
+                            file_name = i.file_name
+                        except:
+                            continue
+                    if file_name == '':
+                        file_name = f'{message.id} - {caption}.{message.document.mime_type.split("/")[-1]}'
+                    else:
+                        # 如果文件名中已经包含了标题，则过滤标题
+                        if get_equal_rate(caption, file_name) > 0.6:
+                            caption = ""
+                        file_name = f'{message.id} - {caption}{file_name}'
+                    total = message.document.size
+                elif message.photo:
+                    file_name = f'{message.id} - {caption}{message.photo.id}.jpg'
+                    total = message.photo.sizes[-1].size
                 else:
-                    # 如果文件名中已经包含了标题，则过滤标题
-                    if get_equal_rate(caption, file_name) > 0.6:
-                        caption = ""
-                    file_name = f'{message.id} - {caption}{file_name}'
-                total = message.document.size
-            elif message.photo:
-                file_name = f'{message.id} - {caption}{message.photo.id}.jpg'
-                total = message.photo.sizes[-1].size
-            else:
-                continue
-            # 主文件夹按对话标题和ID命名
-            dirname = validateTitle(f'{chat_title}({entity.id})')
-            # 分类文件夹按年月
-            datetime_dir_name = message.date.strftime("%Y年%m月")
-            # 如果文件夹不存在则创建文件夹
-            file_save_path = os.path.join(save_path, dirname, datetime_dir_name)
-            if not os.path.exists(file_save_path):
-                os.makedirs(file_save_path)
-            # 判断文件是否在本地存在 存在则删除重新下载
-            if file_name in os.listdir(file_save_path):
-                os.remove(os.path.join(file_save_path, file_name))
-            td = tqdm_up_to(total=total,
-                            desc=f'{get_local_time()} - 正在下载: {file_name}',
-                            unit='B',
-                            unit_scale=True)
-            download_task = loop.create_task(message.download_media(file=os.path.join(file_save_path, file_name),
-                                         progress_callback=td.my_update))
-            await asyncio.wait_for(download_task, timeout=maximum_seconds_per_download)
-            # await message.download_media(file=os.path.join(file_save_path, file_name),
-            #                              progress_callback=td.my_update)
-            td.close()
-            if upload_file_set:
-                cmd = ['gclone', 'move', os.path.join(file_save_path, file_name),
-                       f"{drive_name}:{{{drive_id}}}/{dirname}/{datetime_dir_name}", '-P', '--stats', '1s',
-                       '--ignore-existing']
-                upload_task = loop.create_task(upload_file(cmd, total, file_name, entity_url, message, chat_title))
-                await asyncio.wait_for(upload_task, timeout=maximum_seconds_per_download)
-            else:
-                r.hset('tg_channel_downloader', chat_title, message.id)
+                    continue
+                # 主文件夹按对话标题和ID命名
+                dirname = validateTitle(f'{chat_title}({entity.id})')
+                # 分类文件夹按年月
+                datetime_dir_name = message.date.strftime("%Y年%m月")
+                # 如果文件夹不存在则创建文件夹
+                file_save_path = os.path.join(save_path, dirname, datetime_dir_name)
+                if not os.path.exists(file_save_path):
+                    os.makedirs(file_save_path)
+                # 判断文件是否在本地存在 存在则删除重新下载
+                if file_name in os.listdir(file_save_path):
+                    os.remove(os.path.join(file_save_path, file_name))
+                td = tqdm_up_to(total=total,
+                                desc=f'{get_local_time()} - 正在下载: {file_name}',
+                                unit='B',
+                                unit_scale=True)
+                download_task = loop.create_task(message.download_media(file=os.path.join(file_save_path, file_name),
+                                             progress_callback=td.my_update))
+                await asyncio.wait_for(download_task, timeout=maximum_seconds_per_download)
+                # await message.download_media(file=os.path.join(file_save_path, file_name),
+                #                              progress_callback=td.my_update)
+                td.close()
+                if upload_file_set:
+                    cmd = ['gclone', 'move', os.path.join(file_save_path, file_name),
+                           f"{drive_name}:{{{drive_id}}}/{dirname}/{datetime_dir_name}", '-P', '--stats', '1s',
+                           '--ignore-existing']
+                    upload_task = loop.create_task(upload_file(cmd, total, file_name, entity_url, message, chat_title))
+                    await asyncio.wait_for(upload_task, timeout=maximum_seconds_per_download)
+                else:
+                    r.hset('tg_channel_downloader', chat_title, message.id)
+        tqdm.write('所有下载任务完成！')
+        await bot.send_message(admin_id, f'{chat_title}({entity.id}) - 全部下载完毕！')
+    except errors.FileReferenceExpiredError:
+        await bot.send_message(admin_id, 'Error：\n由于telegram限制消息内媒体的file_reference时间为2小时，正在自动重试任务！')
+        logging.warning('Error：\n由于telegram限制消息内媒体的file_reference时间为2小时，正在自动重试任务！')
+        await main()
 
 
 @events.register(events.NewMessage)
