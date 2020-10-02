@@ -18,10 +18,9 @@ save_path = '/usr/downloads'  # file save path
 upload_file_set = True  # set upload file to google drive
 drive_id = '5FyJClXmsqNw0-Rz19'  # google teamdrive id
 drive_name = 'gc'  # rclone drive name
-max_num = 10  # 同时下载数量
+max_num = 5  # 同时下载数量
 # filter file name/文件名过滤
-filter_list = ['你好，欢迎加入 Quantumu',
-               '\n']
+filter_list = ['你好，欢迎加入 Quantumu', '\n']
 # filter chat id /过滤某些频道不下载
 blacklist = [1388464914,]
 donwload_all_chat = False # 监控所有你加入的频道，收到的新消息如果包含媒体都会下载，默认关闭
@@ -197,7 +196,7 @@ async def handler(update):
                     continue
                 await queue.put((message, chat_title, entity, file_name))
                 last_msg_id = message.id
-        await bot.send_message(admin_id, f'{chat_title} 全部下载完成！最后消息ID为：{last_msg_id}')
+        await bot.send_message(admin_id, f'{chat_title} all message added to task queue, last message is：{last_msg_id}')
 
 
 @events.register(events.NewMessage())
