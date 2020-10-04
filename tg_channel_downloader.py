@@ -24,6 +24,7 @@ filter_list = ['你好，欢迎加入 Quantumu', '\n']
 # filter chat id /过滤某些频道不下载
 blacklist = [1388464914,]
 donwload_all_chat = False # 监控所有你加入的频道，收到的新消息如果包含媒体都会下载，默认关闭
+filter_file_name = ['jpg', ]
 #***********************************************************************************#
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -80,6 +81,9 @@ async def worker(name):
         chat_title = queue_item[1]
         entity = queue_item[2]
         file_name = queue_item[3]
+        for filter_file in filter_file_name:
+            if file_name.endswith(filter_file):
+                return
         dirname = validateTitle(f'{chat_title}({entity.id})')
         datetime_dir_name = message.date.strftime("%Y年%m月")
         file_save_path = os.path.join(save_path, dirname, datetime_dir_name)
